@@ -3,10 +3,7 @@ import torch.nn as nn
 from operations import *
 import time
 
-
 dataset = 'cifar10'
-#dataset = 'lor_cifar10'
-
 test_batch_size = 1
 
 if dataset == 'cifar10':
@@ -49,7 +46,6 @@ elif dataset == 'lor_cifar10':
           ['avg_pool_3', 'none', 'conv_1_RELU', 'none', 'conv_1_RELU', 'none'],
           ['skip_connect', 'avg_pool_3', 'avg_pool_3', 'skip_connect', 'skip_connect', 'avg_pool_3']]
 
-
 class ReLUConvBN(nn.Module):
     def __init__(
         self,
@@ -81,7 +77,6 @@ class ReLUConvBN(nn.Module):
 
     def forward(self, x):
         return self.op(x)
-
 
 class Residual_block(nn.Module):
     def __init__(self, inplanes, planes, stride, affine=True, track_running_stats=True):
@@ -121,13 +116,11 @@ class Residual_block(nn.Module):
 
         basicblock = self.conv_a(inputs)
         basicblock = self.conv_b(basicblock)
-
         if self.downsample is not None:
             residual = self.downsample(inputs)
         else:
             residual = inputs
         return residual + basicblock
-
 
 class Normal_Cell(nn.Module):
 
@@ -142,7 +135,6 @@ class Normal_Cell(nn.Module):
     self.op_6 = OPS[edge_choice[5]](C, stride, False)
 
   def forward(self, input):
-
     node_1 = input
     meta_1 = self.op_1(node_1)
     node_2 = meta_1
@@ -153,23 +145,18 @@ class Normal_Cell(nn.Module):
     meta_5 = self.op_5(node_2)
     meta_6 = self.op_6(node_3)
     node_4 = meta_4 + meta_5 + meta_6
-
     return node_4
-
 
 class Network(nn.Module):
     def __init__(self, cell_numbers):
         super(Network, self).__init__()
         
         self._C = 16
-    
         self.stem = nn.Sequential(
           nn.Conv2d(3, self._C, 3, padding=1, bias=False),
           nn.BatchNorm2d(self._C)
           )
-        
         self.cells = nn.ModuleList()
-        
         for i in range(cell_numbers):
           if i < 5:
             self.cells += [Normal_Cell(geno[i], self._C)]
@@ -193,7 +180,6 @@ class Network(nn.Module):
         else:
           self.classifier = nn.Linear(self._C * 4, num_classes)
         
-        
     def forward(self, x):
         h = self.stem(x)
         for _, cell in enumerate(self.cells):
@@ -203,12 +189,9 @@ class Network(nn.Module):
         h = self.classifier(h)
         return h
 
-
 if __name__ == '__main__':
-    
     model = Network(num_layers)
-        
     begin_time = time.time()
     model(x)
     print(model(x).shape)
-    print(time.time() - begin_time) # s, not ms 
+    print(time.time() - begin_time)
