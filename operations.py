@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 
 OPS = {
-  # three pool, avgpool, maxpool, lppool 
   'avg_pool_3' : lambda C, stride, affine: nn.AvgPool1d(3, stride=stride, padding=1, count_include_pad=False),
   'avg_pool_5' : lambda C, stride, affine: nn.AvgPool1d(5, stride=stride, padding=2, count_include_pad=False),
   'avg_pool_7' : lambda C, stride, affine: nn.AvgPool1d(7, stride=stride, padding=3, count_include_pad=False),
@@ -22,12 +21,8 @@ OPS = {
     nn.LPPool1d(norm_type=2, kernel_size=7, stride=stride)
   ),
   
-  # skip
   'skip_connect' : lambda C, stride, affine: Identity(),
   
-  # sep conv 
-  #'sep_3' : lambda C, stride, affine: SepConv(C, C, 3, stride, 1, affine=affine),
-  #'sep_5' : lambda C, stride, affine: SepConv(C, C, 5, stride, 2, affine=affine),
   'g_conv_3_RELU' : lambda C, stride, affine: nn.Sequential(
     nn.ReLU(inplace=False),
     nn.Conv1d(C, C, kernel_size=3, stride=stride, padding=1, groups=C, bias=False),
@@ -82,9 +77,6 @@ OPS = {
     nn.BatchNorm1d(C, affine=affine)
     ),
   
-  # dil conv 
-  #'dil_3' : lambda C, stride, affine: DilConv(C, C, 3, stride, 2, 2, affine=affine),
-  #'dil_5' : lambda C, stride, affine: DilConv(C, C, 5, stride, 4, 2, affine=affine),
   'dilg_conv_3_RELU' : lambda C, stride, affine: nn.Sequential(
     nn.ReLU(inplace=False),
     nn.Conv1d(C, C, kernel_size=3, stride=stride, padding=2, dilation=2, groups=C, bias=False),
@@ -139,7 +131,6 @@ OPS = {
     nn.BatchNorm1d(C, affine=affine)
     ),
   
-  # normal conv, three activation function "RELU, ELU, LeakyReLU", kernel size[3, 5] 
   'conv_3_RELU' : lambda C, stride, affine: nn.Sequential(
     nn.ReLU(inplace=False),
     nn.Conv1d(C, C, 3, stride=1, padding=1, bias=False),
@@ -222,7 +213,6 @@ class DilConv(nn.Module):
   def forward(self, x):
     return self.op(x)
 
-
 class SepConv(nn.Module):
 
   def __init__(self, C_in, C_out, kernel_size, stride, padding, affine=True):
@@ -241,7 +231,6 @@ class SepConv(nn.Module):
   def forward(self, x):
     return self.op(x)
 
-
 class Identity(nn.Module):
 
   def __init__(self):
@@ -249,7 +238,6 @@ class Identity(nn.Module):
 
   def forward(self, x):
     return x
-
 
 class FactorizedReduce(nn.Module):
 
@@ -259,12 +247,10 @@ class FactorizedReduce(nn.Module):
     self.relu = nn.ReLU(inplace=False)
     self.conv_1 = nn.Conv1d(C_in, C_out // 2, 1, stride=2, padding=0, bias=False)
     self.conv_2 = nn.Conv1d(C_in, C_out // 2, 1, stride=2, padding=0, bias=False)
-    #self.conv_1 = nn.Conv1d(C_in, C_out, 1, stride=2, padding=0, bias=False) 
     self.bn = nn.BatchNorm1d(C_out, affine=affine)
 
   def forward(self, x):
     x = self.relu(x)
     out = torch.cat([self.conv_1(x), self.conv_2(x[:,:,1:])], dim=1)
-    #out = self.conv_1(x)
     out = self.bn(out)
     return out
