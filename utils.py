@@ -4,7 +4,6 @@ import torch
 import shutil
 from torch.autograd import Variable
 
-
 class AvgrageMeter(object):
 
   def __init__(self):
@@ -20,7 +19,6 @@ class AvgrageMeter(object):
     self.cnt += n
     self.avg = self.sum / self.cnt
 
-
 def accuracy(output, target, topk=(1,)):
   maxk = max(topk)
   batch_size = target.size(0)
@@ -35,10 +33,8 @@ def accuracy(output, target, topk=(1,)):
     res.append(correct_k.mul_(100.0/batch_size))
   return res
 
-
 def count_parameters_in_MB(model):
   return np.sum(np.prod(v.size()) for name, v in model.named_parameters() if "auxiliary" not in name)/1e6
-
 
 def save_checkpoint(state, is_best, save):
   filename = os.path.join(save, 'checkpoint.pth.tar')
@@ -47,14 +43,11 @@ def save_checkpoint(state, is_best, save):
     best_filename = os.path.join(save, 'model_best.pth.tar')
     shutil.copyfile(filename, best_filename)
 
-
 def save(model, model_path):
   torch.save(model.state_dict(), model_path)
 
-
 def load(model, model_path):
   model.load_state_dict(torch.load(model_path))
-
 
 def drop_path(x, drop_prob):
   if drop_prob > 0.:
@@ -63,7 +56,6 @@ def drop_path(x, drop_prob):
     x.div_(keep_prob)
     x.mul_(mask)
   return x
-
 
 def create_exp_dir(path, scripts_to_save=None):
   if not os.path.exists(path):
