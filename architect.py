@@ -3,10 +3,8 @@ import numpy as np
 import torch.nn as nn
 from torch.autograd import Variable
 
-
 def _concat(xs):
   return torch.cat([x.view(-1) for x in xs])
-
 
 class Architect(object):
 
@@ -38,7 +36,6 @@ class Architect(object):
 
   def _backward_step(self, input_valid, target_valid):
     loss = self.model._loss(input_valid, target_valid)
-    #loss.backward(retain_graph=True)
     loss.backward()
 
   def _backward_step_unrolled(self, input_train, target_train, input_valid, target_valid, eta, network_optimizer):
