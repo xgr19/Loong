@@ -2,7 +2,7 @@
 
 Generating neural networks for diverse networking classification tasks via hardware-aware neural architecture search, Transactions on Computers 2023
 
-<img src="framework.png" style="zoom: 2%;" />
+<img src="framework.png" style="zoom: 33%;" />
 
 ## Hardware-Aware Neural Architecture Search
 
